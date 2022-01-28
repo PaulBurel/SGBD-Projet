@@ -6,17 +6,22 @@ import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 /**
  * @author Galli Gregory, Mopolo Moke Gabriel
  */
 public class GUI extends JFrame implements ActionListener {
+    private static final String COMMA_DELIMITER = ",";
     TestInteger testInt = new TestInteger();
     BTreePlus<Integer> bInt;
-    private JButton buttonClean, buttonRemove, buttonLoad, buttonSave, buttonAddMany, buttonAddItem, buttonRefresh;
+    private JButton buttonClean, buttonRemove, buttonLoad, buttonSave, buttonAddMany, buttonAddItem, buttonRefresh, buttonaddFile;
     private JTextField txtNbreItem, txtNbreSpecificItem, txtU, txtFile, removeSpecific;
     private final JTree tree = new JTree();
+    ArrayList<ArrayList<String>> records = new ArrayList<>();
 
     public GUI() {
         super();
@@ -44,6 +49,28 @@ public class GUI extends JFrame implements ActionListener {
         } else {
             if (bInt == null)
                 bInt = new BTreePlus<Integer>(Integer.parseInt(txtU.getText()), testInt);
+
+            if (e.getSource() == buttonaddFile) {
+                JFileChooser fc = new JFileChooser();
+                File fileToBeSent = null;
+                System.out.println("in add file");
+                int x = fc.showOpenDialog(null);
+                if (x == JFileChooser.APPROVE_OPTION) {
+                    fileToBeSent = fc.getSelectedFile();
+                    buttonaddFile.setEnabled(true);
+                    try (Scanner scanner = new Scanner(fileToBeSent);) {
+                        while (scanner.hasNextLine()) {
+                            this.records.add(getRecordFromLine(scanner.nextLine()));
+                        }
+                    } catch (FileNotFoundException fileNotFoundException) {
+                        fileNotFoundException.printStackTrace();
+                    }
+                } else {
+                    fileToBeSent = null;
+                    buttonaddFile.setEnabled(false);
+                }
+                System.out.println(this.records);
+            }
 
             if (e.getSource() == buttonAddMany) {
                 for (int i = 0; i < Integer.parseInt(txtNbreItem.getText()); i++) {
@@ -80,6 +107,17 @@ public class GUI extends JFrame implements ActionListener {
             tree.expandRow(i);
 
         tree.updateUI();
+    }
+
+    private ArrayList<String> getRecordFromLine(String line) {
+        ArrayList<String> values = new ArrayList<String>();
+        try (Scanner rowScanner = new Scanner(line)) {
+            rowScanner.useDelimiter(COMMA_DELIMITER);
+            while (rowScanner.hasNext()) {
+                values.add(rowScanner.next());
+            }
+        }
+        return values;
     }
 
     private void build() {
@@ -217,12 +255,19 @@ public class GUI extends JFrame implements ActionListener {
         c.gridwidth = 2;
         pane1.add(buttonRefresh, c);
 
+        buttonaddFile = new JButton("Load File");
+        c.gridx = 2;
+        c.gridy = 8;
+        c.weightx = 1;
+        c.gridwidth = 2;
+        pane1.add(buttonaddFile, c);
+
         c.fill = GridBagConstraints.HORIZONTAL;
         c.ipady = 400;       //reset to default
         c.weighty = 1.0;   //request any extra vertical space
         c.gridwidth = 4;   //2 columns wide
         c.gridx = 0;
-        c.gridy = 8;
+        c.gridy = 9;
 
         JScrollPane scrollPane = new JScrollPane(tree);
         pane1.add(scrollPane, c);
@@ -238,6 +283,7 @@ public class GUI extends JFrame implements ActionListener {
         buttonRemove.addActionListener(this);
         buttonClean.addActionListener(this);
         buttonRefresh.addActionListener(this);
+        buttonaddFile.addActionListener(this);
 
         return pane1;
     }

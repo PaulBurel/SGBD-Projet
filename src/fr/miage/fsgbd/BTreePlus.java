@@ -11,7 +11,7 @@ public class BTreePlus<Type> implements java.io.Serializable {
     private Noeud<Type> racine;
 
     public BTreePlus(int u, Executable e) {
-        racine = new Noeud<Type>(u, e, null);
+        racine = new Noeud<Type>(u, e, null, 0);
     }
 
     public void afficheArbre() {
