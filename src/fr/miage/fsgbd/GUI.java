@@ -51,11 +51,11 @@ public class GUI extends JFrame implements ActionListener {
                 bInt = new BTreePlus<Integer>(Integer.parseInt(txtU.getText()), testInt);
 
             if (e.getSource() == buttonaddFile) {
+                this.records = new ArrayList<>();
                 JFileChooser fc = new JFileChooser();
                 File fileToBeSent = null;
-                System.out.println("in add file");
                 int x = fc.showOpenDialog(null);
-                if (x == JFileChooser.APPROVE_OPTION) {
+                if (x == JFileChooser.APPROVE_OPTION) { // si fichier valide
                     fileToBeSent = fc.getSelectedFile();
                     buttonaddFile.setEnabled(true);
                     try (Scanner scanner = new Scanner(fileToBeSent);) {
@@ -69,24 +69,15 @@ public class GUI extends JFrame implements ActionListener {
                     fileToBeSent = null;
                     buttonaddFile.setEnabled(false);
                 }
-                System.out.println(this.records);
+                System.out.println("cols in csv : " + this.records.get(0).size() + " colnames = " + this.records.get(0));
+                System.out.println("rows in csv = " + (this.records.size() - 1));
+
+                fileLoaded();
+
             }
 
             if (e.getSource() == buttonAddMany) {
-                for (int i = 0; i < Integer.parseInt(txtNbreItem.getText()); i++) {
-                    int valeur = (int) (Math.random() * 10 * Integer.parseInt(txtNbreItem.getText()));
-                    boolean done = bInt.addValeur(valeur);
-
-					/*
-					  On pourrait forcer l'ajout mais on risque alors de tomber dans une boucle infinie sans "r?gle" faisant sens pour en sortir
-
-					while (!done)
-					{
-						valeur =(int) (Math.random() * 10 * Integer.parseInt(txtNbreItem.getText()));
-						done = bInt.addValeur(valeur);
-					}
-					 */
-                }
+                addMany(Integer.parseInt(txtNbreItem.getText()));
 
             } else if (e.getSource() == buttonAddItem) {
                 if (!bInt.addValeur(Integer.parseInt(txtNbreSpecificItem.getText())))
@@ -120,6 +111,50 @@ public class GUI extends JFrame implements ActionListener {
         return values;
     }
 
+    private void fileLoaded() {
+        ArrayList<Integer> val = new ArrayList<>();
+        ArrayList<Integer> pointeurs = new ArrayList<>();
+        for (int i = 1; i < this.records.size(); i++){
+            //0 = col avec num secu
+            val.add(Integer.parseInt(records.get(i).get(0)));
+            pointeurs.add(i); //on garde la "ligne" dans le csv
+        }
+        addMany(val, pointeurs);
+    }
+
+    private void addMany(int nb) {
+        for (int i = 0; i < nb; i++) {
+            int valeur = (int) (Math.random() * 10 * nb);
+            boolean done = bInt.addValeur(valeur);
+
+					/*
+					  On pourrait forcer l'ajout mais on risque alors de tomber dans une boucle infinie sans "r?gle" faisant sens pour en sortir
+
+					while (!done)
+					{
+						valeur =(int) (Math.random() * 10 * Integer.parseInt(txtNbreItem.getText()));
+						done = bInt.addValeur(valeur);
+					}
+					 */
+        }
+    }
+
+    private void addMany(ArrayList<Integer> valeurs, ArrayList<Integer> pointeurs) {
+        for (int i = 0; i < valeurs.size(); i++) {
+            boolean done = bInt.addValeur(valeurs.get(i), pointeurs.get(i));
+
+					/*
+					  On pourrait forcer l'ajout mais on risque alors de tomber dans une boucle infinie sans "r?gle" faisant sens pour en sortir
+
+					while (!done)
+					{
+						valeur =(int) (Math.random() * 10 * Integer.parseInt(txtNbreItem.getText()));
+						done = bInt.addValeur(valeur);
+					}
+					 */
+        }
+    }
+
     private void build() {
         setTitle("Indexation - B Arbre");
         setSize(760, 760);
@@ -139,7 +174,7 @@ public class GUI extends JFrame implements ActionListener {
         c.fill = GridBagConstraints.HORIZONTAL;
         c.insets = new Insets(0, 5, 2, 0);
 
-        JLabel labelU = new JLabel("Nombre max de cl?s par noeud (2m): ");
+        JLabel labelU = new JLabel("Nombre max de clés par noeud (2m): ");
         c.gridx = 0;
         c.gridy = 1;
         c.weightx = 1;
@@ -151,7 +186,7 @@ public class GUI extends JFrame implements ActionListener {
         c.weightx = 2;
         pane1.add(txtU, c);
 
-        JLabel labelBetween = new JLabel("Nombre de clefs ? ajouter:");
+        JLabel labelBetween = new JLabel("Nombre de clefs à ajouter:");
         c.gridx = 0;
         c.gridy = 2;
         c.weightx = 1;
@@ -164,14 +199,14 @@ public class GUI extends JFrame implements ActionListener {
         pane1.add(txtNbreItem, c);
 
 
-        buttonAddMany = new JButton("Ajouter n ?l?ments al?atoires ? l'arbre");
+        buttonAddMany = new JButton("Ajouter n éléments aléatoires à l'arbre");
         c.gridx = 2;
         c.gridy = 2;
         c.weightx = 1;
         c.gridwidth = 2;
         pane1.add(buttonAddMany, c);
 
-        JLabel labelSpecific = new JLabel("Ajouter une valeur sp?cifique:");
+        JLabel labelSpecific = new JLabel("Ajouter une valeur spécifique:");
         c.gridx = 0;
         c.gridy = 3;
         c.weightx = 1;
@@ -185,14 +220,14 @@ public class GUI extends JFrame implements ActionListener {
         c.gridwidth = 1;
         pane1.add(txtNbreSpecificItem, c);
 
-        buttonAddItem = new JButton("Ajouter l'?l?ment");
+        buttonAddItem = new JButton("Ajouter l'élément");
         c.gridx = 2;
         c.gridy = 3;
         c.weightx = 1;
         c.gridwidth = 2;
         pane1.add(buttonAddItem, c);
 
-        JLabel labelRemoveSpecific = new JLabel("Retirer une valeur sp?cifique:");
+        JLabel labelRemoveSpecific = new JLabel("Retirer une valeur spécifique:");
         c.gridx = 0;
         c.gridy = 4;
         c.weightx = 1;
@@ -206,7 +241,7 @@ public class GUI extends JFrame implements ActionListener {
         c.gridwidth = 1;
         pane1.add(removeSpecific, c);
 
-        buttonRemove = new JButton("Supprimer l'?l?ment n de l'arbre");
+        buttonRemove = new JButton("Supprimer l'élément n de l'arbre");
         c.gridx = 2;
         c.gridy = 4;
         c.weightx = 1;

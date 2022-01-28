@@ -51,6 +51,17 @@ public class BTreePlus<Type> implements java.io.Serializable {
         return false;
     }
 
+    public boolean addValeur(Type valeur, int pointeur) {
+        System.out.println("Ajout de la valeur : " + valeur.toString() + " ayant comme pointeur : " + pointeur);
+        if (racine.contient(valeur) == null) {
+            Noeud<Type> newRacine = racine.addValeur(valeur, pointeur);
+            if (racine != newRacine)
+                racine = newRacine;
+            return true;
+        }
+        return false;
+    }
+
 
     public void removeValeur(Type valeur) {
         System.out.println("Retrait de la valeur : " + valeur.toString());
