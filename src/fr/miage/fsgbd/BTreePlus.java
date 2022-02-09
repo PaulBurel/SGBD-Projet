@@ -9,9 +9,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
  */
 public class BTreePlus<Type> implements java.io.Serializable {
     private Noeud<Type> racine;
+    private Noeud<Type> previous;
+    private boolean reload;
 
     public BTreePlus(int u, Executable e) {
-        racine = new Noeud<Type>(u, e, null, 0);
+        racine = new Noeud<Type>(u, e, null);
     }
 
     public void afficheArbre() {
@@ -23,24 +25,43 @@ public class BTreePlus<Type> implements java.io.Serializable {
      *
      * @return DefaultMutableTreeNode
      */
-    public DefaultMutableTreeNode bArbreToJTree() {
+    public DefaultMutableTreeNode bArbreToJTree()
+    {
+        if (previous != null)
+        {
+            reload = true;
+        }
         return bArbreToJTree(racine);
     }
 
     private DefaultMutableTreeNode bArbreToJTree(Noeud<Type> root) {
         StringBuilder txt = new StringBuilder();
+        if (root.fils.size() == 0)
+        {
+            if (previous != null && !reload)
+            {
+                previous.next = root;
+            }
+        }
         for (Type key : root.keys)
-            txt.append(key.toString()).append(" ");
+        {
+            txt.append(key.toString()).append(" | ");
+        }
 
         DefaultMutableTreeNode racine2 = new DefaultMutableTreeNode(txt.toString(), true);
-        for (Noeud<Type> fil : root.fils)
+        //System.out.println("start print");
+        for (Noeud<Type> fil : root.fils){
             racine2.add(bArbreToJTree(fil));
+            //System.out.println("le key : " + root.pointeur + " a comme fils : " + fil.pointeur);
+        }
 
         return racine2;
     }
 
 
     public boolean addValeur(Type valeur) {
+        reload = false;
+        previous = null;
         System.out.println("Ajout de la valeur : " + valeur.toString());
         if (racine.contient(valeur) == null) {
             Noeud<Type> newRacine = racine.addValeur(valeur);
@@ -52,6 +73,8 @@ public class BTreePlus<Type> implements java.io.Serializable {
     }
 
     public boolean addValeur(Type valeur, int pointeur) {
+        reload = false;
+        previous = null;
         System.out.println("Ajout de la valeur : " + valeur.toString() + " ayant comme pointeur : " + pointeur);
         if (racine.contient(valeur) == null) {
             Noeud<Type> newRacine = racine.addValeur(valeur, pointeur);
@@ -64,6 +87,8 @@ public class BTreePlus<Type> implements java.io.Serializable {
 
 
     public void removeValeur(Type valeur) {
+        reload = false;
+        previous = null;
         System.out.println("Retrait de la valeur : " + valeur.toString());
         if (racine.contient(valeur) != null) {
             Noeud<Type> newRacine = racine.removeValeur(valeur, false);

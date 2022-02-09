@@ -1,6 +1,8 @@
 package fr.miage.fsgbd;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /*
@@ -17,6 +19,8 @@ public class Noeud<Type> implements java.io.Serializable {
     // Collection des cl�s du noeud courant
     public ArrayList<Type> keys = new ArrayList<Type>();
 
+    public Map<Type, Integer> ptrs = new HashMap<>();
+
     // Noeud Parent du noeud courant
     private Noeud<Type> parent;
 
@@ -26,7 +30,7 @@ public class Noeud<Type> implements java.io.Serializable {
     // Ordre de l'abre (u = nombre de cl�s maximum = 2m)
     private final int u, tailleMin;
 
-    int pointeur;
+    Noeud<Type> next;
 
 
     /* Constructeur de la classe noeud, qui permet l'ajout et la recherche d'�l�ment dans les branches
@@ -39,14 +43,7 @@ public class Noeud<Type> implements java.io.Serializable {
         this.tailleMin = u/2;
         compar = e;
         this.parent = parent;
-    }
-
-    public Noeud(int u, Executable e, Noeud<Type> parent, int pointeur) {
-        this.u = u;
-        this.tailleMin = u/2;
-        compar = e;
-        this.parent = parent;
-        this.pointeur = pointeur;
+        this.next = null;
     }
 
     public boolean compare(Type arg1, Type arg2) {
@@ -130,6 +127,17 @@ public class Noeud<Type> implements java.io.Serializable {
         }
     }
 
+    private void insert(Type valeur, int ligne) {
+        System.out.println("correct called");
+        int i = 0;
+        while ((this.keys.size() > i) && compare(this.keys.get(i), valeur)) {
+            i++;
+        }
+        this.keys.add(i, valeur);
+        this.ptrs.put(valeur,ligne);
+        System.out.println("added " + valeur + " on " + i + " with pointer : " + ligne);
+
+    }
 
     /**
      * Ins�re une clef dans le noeud courant
@@ -517,7 +525,7 @@ public class Noeud<Type> implements java.io.Serializable {
                 // Enfin, si le noeud courant est la racine
                 if (noeud.parent == null) {
                     // On cr�e un nouveau noeud qui prendra sa place
-                    Noeud<Type> nouveauParent = new Noeud<Type>(u, compar, null, 1);
+                    Noeud<Type> nouveauParent = new Noeud<Type>(u, compar, null);
 
                     // Qui deviendra le parent des noeuds gauche et droit
                     nouveauParent.addNoeud(noeudGauche);
@@ -585,11 +593,11 @@ public class Noeud<Type> implements java.io.Serializable {
 
 
                 // On cr�e deux nouveaux noeuds
-                Noeud<Type> noeudGauche = new Noeud<Type>(u, compar, null, pointeur);
-                Noeud<Type> noeudDroit = new Noeud<Type>(u, compar, null, pointeur);
+                Noeud<Type> noeudGauche = new Noeud<Type>(u, compar, null);
+                Noeud<Type> noeudDroit = new Noeud<Type>(u, compar, null);
 
                 // On ins�re la valeur comme nouvelle clef du noeud courant
-                noeud.insert(nouvelleValeur);
+                noeud.insert(nouvelleValeur, pointeur);
                 tailleListe++;
 
                 // On v�rifie le nombre de clefs dans le noeud courant pour savoir si on a une clef centrale ou si la m�diane se trouve entre deux clefs
@@ -634,7 +642,7 @@ public class Noeud<Type> implements java.io.Serializable {
                 // Enfin, si le noeud courant est la racine
                 if (noeud.parent == null) {
                     // On cr�e un nouveau noeud qui prendra sa place
-                    Noeud<Type> nouveauParent = new Noeud<Type>(u, compar, null, 1);
+                    Noeud<Type> nouveauParent = new Noeud<Type>(u, compar, null);
 
                     // Qui deviendra le parent des noeuds gauche et droit
                     nouveauParent.addNoeud(noeudGauche);
@@ -662,7 +670,7 @@ public class Noeud<Type> implements java.io.Serializable {
                 }
 
             } else // Si le nombre de clefs dans le noeud n'est pas au max, on ajoute simplement la clef au noeud courant
-                noeud.insert(nouvelleValeur);
+                noeud.insert(nouvelleValeur, pointeur);
         }
 
         return racine;

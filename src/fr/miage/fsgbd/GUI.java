@@ -17,9 +17,10 @@ import java.util.Scanner;
 public class GUI extends JFrame implements ActionListener {
     private static final String COMMA_DELIMITER = ",";
     TestInteger testInt = new TestInteger();
+    //TODO doit dependre du type de colonne à indexer
     BTreePlus<Integer> bInt;
     private JButton buttonClean, buttonRemove, buttonLoad, buttonSave, buttonAddMany, buttonAddItem, buttonRefresh, buttonaddFile;
-    private JTextField txtNbreItem, txtNbreSpecificItem, txtU, txtFile, removeSpecific;
+    private JTextField txtNbreItem, txtNbreSpecificItem, txtU, txtFile, removeSpecific, txtColNb;
     private final JTree tree = new JTree();
     ArrayList<ArrayList<String>> records = new ArrayList<>();
 
@@ -72,7 +73,8 @@ public class GUI extends JFrame implements ActionListener {
                 System.out.println("cols in csv : " + this.records.get(0).size() + " colnames = " + this.records.get(0));
                 System.out.println("rows in csv = " + (this.records.size() - 1));
 
-                fileLoaded();
+                // TODO verifier si le col de colnb est bien int
+                fileLoaded(Integer.parseInt(txtColNb.getText()));
 
             }
 
@@ -111,12 +113,11 @@ public class GUI extends JFrame implements ActionListener {
         return values;
     }
 
-    private void fileLoaded() {
+    private void fileLoaded(int colnb) {
         ArrayList<Integer> val = new ArrayList<>();
         ArrayList<Integer> pointeurs = new ArrayList<>();
         for (int i = 1; i < this.records.size(); i++){
-            //0 = col avec num secu
-            val.add(Integer.parseInt(records.get(i).get(0)));
+            val.add(Integer.parseInt(records.get(i).get(colnb)));
             pointeurs.add(i); //on garde la "ligne" dans le csv
         }
         addMany(val, pointeurs);
@@ -278,21 +279,34 @@ public class GUI extends JFrame implements ActionListener {
 
         buttonClean = new JButton("Reset");
         c.gridx = 2;
-        c.gridy = 6;
+        c.gridy = 7;
         c.weightx = 1;
         c.gridwidth = 2;
         pane1.add(buttonClean, c);
 
         buttonRefresh = new JButton("Refresh");
         c.gridx = 2;
-        c.gridy = 7;
+        c.gridy = 8;
         c.weightx = 1;
         c.gridwidth = 2;
         pane1.add(buttonRefresh, c);
 
+        JLabel labelAddFile = new JLabel("Numero de la colonne à indexer : ");
+        c.gridx = 0;
+        c.gridy = 6;
+        c.weightx = 1;
+        c.gridwidth = 1;
+        pane1.add(labelAddFile, c);
+
+        txtColNb = new JTextField("0", 7);
+        c.gridx = 1;
+        c.gridy = 6;
+        c.weightx = 1;
+        pane1.add(txtColNb, c);
+
         buttonaddFile = new JButton("Load File");
         c.gridx = 2;
-        c.gridy = 8;
+        c.gridy = 6;
         c.weightx = 1;
         c.gridwidth = 2;
         pane1.add(buttonaddFile, c);
