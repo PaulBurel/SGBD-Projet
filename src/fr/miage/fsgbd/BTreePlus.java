@@ -1,6 +1,8 @@
 package fr.miage.fsgbd;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -10,6 +12,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 public class BTreePlus<Type> implements java.io.Serializable {
     private Noeud<Type> racine;
     private Noeud<Type> previous;
+    private Map<Type, Integer> ptrs = new HashMap<>();
     private boolean reload;
 
     public BTreePlus(int u, Executable e) {
@@ -58,6 +61,43 @@ public class BTreePlus<Type> implements java.io.Serializable {
         return racine2;
     }
 
+    public boolean search(Type id)
+    {
+        return search(this.racine, id);
+    }
+
+    public boolean search(Noeud<Type> ln, Type id)
+    {
+        if (ln.fils.size() == 0)
+        {
+            int found = ln.binarySearch((int)(id));
+            if (found == -1) System.out.println("bug = " + ln.keys);
+            System.out.println("found it. " + ln.keys.get(found) + "'s ptr is = " + ptrs.get(ln.keys.get(found)));
+            return true;
+        }
+        for (int idx = 0; idx < ln.keys.size(); idx++)
+        {
+            if ((int)(ln.keys.get(idx)) >= (int)(id))
+            {
+                return search(ln.fils.get(idx), id);
+            }
+            else if ((int)(ln.keys.get(idx)) < (int)(id))
+            {
+                if (ln.keys.size() > idx + 1){
+                    if ((int)(ln.keys.get(idx + 1)) >= (int)(id))
+                    {
+                        return search(ln.fils.get(idx + 1), id);
+                    }
+                }
+                else
+                {
+                    return search(ln.fils.get(idx + 1), id);
+                }
+            }
+        }
+        return false;
+    }
+
 
     public boolean addValeur(Type valeur) {
         reload = false;
@@ -76,6 +116,7 @@ public class BTreePlus<Type> implements java.io.Serializable {
         reload = false;
         previous = null;
         System.out.println("Ajout de la valeur : " + valeur.toString() + " ayant comme pointeur : " + pointeur);
+        ptrs.put(valeur, pointeur);
         if (racine.contient(valeur) == null) {
             Noeud<Type> newRacine = racine.addValeur(valeur, pointeur);
             if (racine != newRacine)

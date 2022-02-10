@@ -1,8 +1,6 @@
 package fr.miage.fsgbd;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 
 /*
@@ -18,8 +16,6 @@ public class Noeud<Type> implements java.io.Serializable {
 
     // Collection des cl�s du noeud courant
     public ArrayList<Type> keys = new ArrayList<Type>();
-
-    public Map<Type, Integer> ptrs = new HashMap<>();
 
     // Noeud Parent du noeud courant
     private Noeud<Type> parent;
@@ -48,6 +44,24 @@ public class Noeud<Type> implements java.io.Serializable {
 
     public boolean compare(Type arg1, Type arg2) {
         return compar.execute(arg1, arg2);
+    }
+
+    public int binarySearch(int id)
+    {
+        int left = 0, right = keys.size() - 1;
+
+        while (left <= right)
+        {
+            int mid = left + (right - left) / 2;
+
+            if ((int)(keys.get(mid)) == id)
+                return mid;
+            if ((int)(keys.get(mid)) < id)
+                left = mid + 1;
+            else
+                right = mid - 1;
+        }
+        return -1;
     }
 
     /**
@@ -134,7 +148,6 @@ public class Noeud<Type> implements java.io.Serializable {
             i++;
         }
         this.keys.add(i, valeur);
-        this.ptrs.put(valeur,ligne);
         System.out.println("added " + valeur + " on " + i + " with pointer : " + ligne);
 
     }

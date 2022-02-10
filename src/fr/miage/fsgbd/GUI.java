@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -19,8 +20,8 @@ public class GUI extends JFrame implements ActionListener {
     TestInteger testInt = new TestInteger();
     //TODO doit dependre du type de colonne à indexer
     BTreePlus<Integer> bInt;
-    private JButton buttonClean, buttonRemove, buttonLoad, buttonSave, buttonAddMany, buttonAddItem, buttonRefresh, buttonaddFile;
-    private JTextField txtNbreItem, txtNbreSpecificItem, txtU, txtFile, removeSpecific, txtColNb;
+    private JButton buttonClean, buttonRemove, buttonLoad, buttonSave, buttonAddMany, buttonAddItem, buttonRefresh, buttonaddFile, buttonSearch;
+    private JTextField txtNbreItem, txtNbreSpecificItem, txtU, txtFile, removeSpecific, txtColNb, txtSearchLine;
     private final JTree tree = new JTree();
     ArrayList<ArrayList<String>> records = new ArrayList<>();
 
@@ -76,6 +77,31 @@ public class GUI extends JFrame implements ActionListener {
                 // TODO verifier si le col de colnb est bien int
                 fileLoaded(Integer.parseInt(txtColNb.getText()));
 
+            }
+
+            if (e.getSource() == buttonSearch)
+            {
+                if (records.size() > 0)
+                {
+                    int nbCol = Integer.parseInt(txtColNb.getText());
+                    Random rand = new Random();
+                    int idx = rand.nextInt(records.size());
+                    int idToSearch = Integer.parseInt(records.get(idx).get(nbCol));
+                    long startTime = System.nanoTime();
+                    linearSearch(idToSearch);
+                    long endTime = System.nanoTime();
+                    long duration = (endTime - startTime);
+                    System.out.println("linear search duration = " + duration + " nanoseconds");
+                    startTime = System.nanoTime();
+                    indexSearch(idToSearch);
+                    endTime = System.nanoTime();
+                    duration = (endTime - startTime);
+                    System.out.println("index search duration = " + duration + " nanoseconds");
+                }
+                else
+                {
+                    System.out.println("Chargez d'abord un fichier");
+                }
             }
 
             if (e.getSource() == buttonAddMany) {
@@ -155,6 +181,26 @@ public class GUI extends JFrame implements ActionListener {
 					 */
         }
     }
+
+    private int linearSearch(int id)
+    {
+        int nbCol = Integer.parseInt(txtColNb.getText());
+        for (int i = 1; i < records.size(); i++)
+        {
+            if (id == Integer.parseInt(records.get(i).get(nbCol)))
+            {
+                System.out.println("found it. " + id + "'s ptr is = " + i);
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private boolean indexSearch(int id)
+    {
+        return bInt.search(id);
+    }
+
 
     private void build() {
         setTitle("Indexation - B Arbre");
@@ -279,14 +325,14 @@ public class GUI extends JFrame implements ActionListener {
 
         buttonClean = new JButton("Reset");
         c.gridx = 2;
-        c.gridy = 7;
+        c.gridy = 8;
         c.weightx = 1;
         c.gridwidth = 2;
         pane1.add(buttonClean, c);
 
         buttonRefresh = new JButton("Refresh");
         c.gridx = 2;
-        c.gridy = 8;
+        c.gridy = 9;
         c.weightx = 1;
         c.gridwidth = 2;
         pane1.add(buttonRefresh, c);
@@ -311,12 +357,19 @@ public class GUI extends JFrame implements ActionListener {
         c.gridwidth = 2;
         pane1.add(buttonaddFile, c);
 
+        buttonSearch = new JButton("Statistiques de recherche");
+        c.gridx = 2;
+        c.gridy = 7;
+        c.weightx = 0.5;
+        c.gridwidth = 2;
+        pane1.add(buttonSearch, c);
+
         c.fill = GridBagConstraints.HORIZONTAL;
         c.ipady = 400;       //reset to default
         c.weighty = 1.0;   //request any extra vertical space
         c.gridwidth = 4;   //2 columns wide
         c.gridx = 0;
-        c.gridy = 9;
+        c.gridy = 10;
 
         JScrollPane scrollPane = new JScrollPane(tree);
         pane1.add(scrollPane, c);
@@ -333,6 +386,7 @@ public class GUI extends JFrame implements ActionListener {
         buttonClean.addActionListener(this);
         buttonRefresh.addActionListener(this);
         buttonaddFile.addActionListener(this);
+        buttonSearch.addActionListener(this);
 
         return pane1;
     }
