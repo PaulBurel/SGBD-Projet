@@ -1,9 +1,6 @@
 package fr.miage.fsgbd;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**
@@ -12,7 +9,6 @@ import java.util.Map;
  */
 public class BTreePlus<Type> implements java.io.Serializable {
     private Noeud<Type> racine;
-    private Map<Type, Integer> ptrs = new HashMap<>();
 
     public BTreePlus(int u, Executable e) {
         racine = new Noeud<Type>(u, e, null);
@@ -44,25 +40,17 @@ public class BTreePlus<Type> implements java.io.Serializable {
     public void construct()
     {
         construct(this.racine);
+        System.out.println("");
         System.out.println("Construction Test : ");
         test(this.racine);
+        System.out.println("---------------");
+        System.out.println("");
     }
 
     private void construct(Noeud<Type> n)
     {
-        if (n.fils.size() == 0)
-        {
-            ArrayList<Integer> lines = new ArrayList<>();
-            for (Type key : n.keys)
-            {
-                lines.add(ptrs.get(key));
-            }
-            n.isLeafNode(lines);
-        }
-        for (int i = 0; i < n.fils.size(); i++)
-        {
-            construct(n.fils.get(i));
-        }
+        if (n.fils.size() == 0) n.isLeafNode();
+        for (int i = 0; i < n.fils.size(); i++) construct(n.fils.get(i));
     }
 
     private void test(Noeud<Type> n)
@@ -132,8 +120,13 @@ public class BTreePlus<Type> implements java.io.Serializable {
     }
 
     public boolean addValeur(Type valeur, int pointeur) {
-        ptrs.put(valeur, pointeur);
-        return addValeur(valeur);
+        if (racine.contient(valeur) == null) {
+            Noeud<Type> newRacine = racine.addValeur(valeur, pointeur);
+            if (racine != newRacine)
+                racine = newRacine;
+            return true;
+        }
+        return false;
     }
 
 

@@ -123,7 +123,6 @@ public class Noeud<Type> implements java.io.Serializable {
      */
     public void afficheNoeud(boolean afficheSousNoeuds, int lvl) {
 
-        System.out.println("affiche appelé");
         StringBuilder dots = new StringBuilder();
 
         for (int i = 0; i < lvl; i++) {
@@ -155,6 +154,15 @@ public class Noeud<Type> implements java.io.Serializable {
         this.keys.add(i, valeur);
     }
 
+    private void insert(Type valeur, int pointeur) {
+        int i = 0;
+        while ((this.keys.size() > i) && compare(this.keys.get(i), valeur)) {
+            i++;
+        }
+        this.keys.add(i, valeur);
+        this.ptrs.add(i, pointeur);
+    }
+
     /**
      * Retire une clef dans le noeud courant
      * @param valeur � retirer des clefs du noeud courant
@@ -183,6 +191,11 @@ public class Noeud<Type> implements java.io.Serializable {
 
     public Noeud<Type> addValeur(Type nouvelleValeur) {
         Noeud<Type> racine = addValeur(nouvelleValeur, false);
+        return racine;
+    }
+
+    public Noeud<Type> addValeur(Type nouvelleValeur, int pointeur) {
+        Noeud<Type> racine = addValeur(nouvelleValeur, false, pointeur);
         return racine;
     }
 
@@ -389,10 +402,9 @@ public class Noeud<Type> implements java.io.Serializable {
             remplacerDansParents(noeud.parent, aRemplacer, remplacant);
     }
 
-    public void isLeafNode(ArrayList<Integer> lines)
+    public void isLeafNode()
     {
         if (getNoeudSuivant() != null) this.next = getNoeudSuivant();
-        this.ptrs = lines;
     }
 
     public Noeud<Type> getNoeudSuivant()
@@ -559,6 +571,116 @@ public class Noeud<Type> implements java.io.Serializable {
 
             } else // Si le nombre de clefs dans le noeud n'est pas au max, on ajoute simplement la clef au noeud courant
                 noeud.insert(nouvelleValeur);
+        }
+
+        return racine;
+    }
+
+    public Noeud<Type> addValeur(Type nouvelleValeur, boolean force, int pointeur) {
+        // Initialisation des variables
+        Noeud<Type> noeud, racine = this;
+        Type eleMedian;
+        int indexMedian;
+
+        // On remonte jusqu'� la racine � partir du noeud courant
+        while (racine.parent != null)
+            racine = racine.parent;
+
+        // Si force = true, l'ajout se fera dans le noeud courant
+        if (force)
+            noeud = this;
+        else // Sinon on va aller chercher le noeud ou l'on doit ajouter la nouvelle valeur
+            noeud = this.choixNoeudAjout(nouvelleValeur);
+
+        // On note le nombre de clef dans le noeud courant avant de commencer
+        int tailleListe = noeud.keys.size();
+
+        // On v�rifie que la valeur ne soit pas d�j� pr�sente dans l'arbre (juste au cas o�)
+        if (!noeud.keys.contains(nouvelleValeur)) {
+
+            // Si le nombre de clef du noeud courant est �gal au nom max d'�l�ments (2m)
+            if (tailleListe >= u) {
+
+
+                // On cr�e deux nouveaux noeuds
+                Noeud<Type> noeudGauche = new Noeud<Type>(u, compar, null);
+                Noeud<Type> noeudDroit = new Noeud<Type>(u, compar, null);
+
+                // On ins�re la valeur comme nouvelle clef du noeud courant
+                noeud.insert(nouvelleValeur, pointeur);
+                tailleListe++;
+
+                // On v�rifie le nombre de clefs dans le noeud courant pour savoir si on a une clef centrale ou si la m�diane se trouve entre deux clefs
+                if (tailleListe % 2 == 0)
+                    indexMedian = (tailleListe / 2);
+                else
+                    indexMedian = ((1 + tailleListe) / 2) - 1;
+
+                // On r�cup�re la valeur centrale du noeud courant pour plus tard
+                eleMedian = noeud.keys.get(indexMedian);
+
+                // On utilise un appel r�cursif pour ajouter au noeud gauche, les clefs du noeud courant
+                for (int i = 0; i < indexMedian; i++)
+                    noeudGauche.addValeur(noeud.keys.get(i), noeud.ptrs.get(i));
+
+                // Puis on fait de m�me avec le noeud droit sans traiter la clef centrale si le noeud courant a des fils
+                if (!noeud.fils.isEmpty()) {
+                    for (int i = indexMedian + 1; i < tailleListe; i++)
+                        noeudDroit.addValeur(noeud.keys.get(i), noeud.ptrs.get(i));
+                } else {
+                    for (int i = indexMedian; i < tailleListe; i++)
+                        noeudDroit.addValeur(noeud.keys.get(i), noeud.ptrs.get(i));
+                }
+
+                // Ensuite, si le noeud courant a des fils
+                if (!noeud.fils.isEmpty()) {
+                    indexMedian++;
+
+                    // On ajoute au noeud gauche les fils du noeud courant qui sont � gauche de la m�diane
+                    for (int i = 0; i < (indexMedian); i++) {
+                        noeudGauche.addNoeud(noeud.fils.get(i));
+                        noeud.fils.get(i).parent = noeudGauche;
+                    }
+
+                    // Et on ajoute au noeud droit les fils du noeud courant qui sont sur la m�diane ou � droite de la m�diane
+                    for (int i = (indexMedian); i < noeud.fils.size(); i++) {
+                        noeudDroit.addNoeud(noeud.fils.get(i));
+                        noeud.fils.get(i).parent = noeudDroit;
+                    }
+                }
+
+                // Enfin, si le noeud courant est la racine
+                if (noeud.parent == null) {
+                    // On cr�e un nouveau noeud qui prendra sa place
+                    Noeud<Type> nouveauParent = new Noeud<Type>(u, compar, null);
+
+                    // Qui deviendra le parent des noeuds gauche et droit
+                    nouveauParent.addNoeud(noeudGauche);
+                    nouveauParent.addNoeud(noeudDroit);
+                    noeudGauche.parent = nouveauParent;
+                    noeudDroit.parent = nouveauParent;
+
+                    // Et on rajoute dans les clefs du nouveau parent l'ancienne clef "centrale"
+                    nouveauParent.addValeur(eleMedian, true, pointeur);
+
+                    // On modifie alors la racine pour faire de notre nouveau noeud, la racine de l'arbre
+                    racine = nouveauParent;
+                } else {
+                    // Sinon, on ajoute les noeuds gauche et droit comme fils du parent du noeud courant (faisant des noeuds gauche et droit des fr�res du noeud courant)
+                    noeud.parent.addNoeud(noeudGauche);
+                    noeud.parent.addNoeud(noeudDroit);
+                    noeudGauche.parent = noeud.parent;
+                    noeudDroit.parent = noeud.parent;
+
+                    // On retire le noeud courant des fils du parent ( les noeuds gauche et droit viennent le remplacer )
+                    noeud.parent.removeNoeud(noeud);
+
+                    // Et on fini par ajouter l'�l�ment m�dian laiss� de c�t� plus t�t au parent du noeud courant ( on remonte la clef dans le parent )
+                    racine = noeud.parent.addValeur(eleMedian, true, pointeur);
+                }
+
+            } else // Si le nombre de clefs dans le noeud n'est pas au max, on ajoute simplement la clef au noeud courant
+                noeud.insert(nouvelleValeur, pointeur);
         }
 
         return racine;
