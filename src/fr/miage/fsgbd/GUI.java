@@ -21,7 +21,7 @@ public class GUI extends JFrame implements ActionListener {
     //TODO doit dependre du type de colonne à indexer
     BTreePlus<Integer> bInt;
     private JButton buttonClean, buttonRemove, buttonLoad, buttonSave, buttonAddMany, buttonAddItem, buttonRefresh, buttonaddFile, buttonSearch;
-    private JTextField txtNbreItem, txtNbreSpecificItem, txtU, txtFile, removeSpecific, txtColNb, txtSearchLine;
+    private JTextField txtNbreItem, txtNbreSpecificItem, txtU, txtFile, removeSpecific, txtColNb;
     private final JTree tree = new JTree();
     ArrayList<ArrayList<String>> records = new ArrayList<>();
 
@@ -84,19 +84,7 @@ public class GUI extends JFrame implements ActionListener {
                 if (records.size() > 0)
                 {
                     int nbCol = Integer.parseInt(txtColNb.getText());
-                    Random rand = new Random();
-                    int idx = rand.nextInt(records.size());
-                    int idToSearch = Integer.parseInt(records.get(idx).get(nbCol));
-                    long startTime = System.nanoTime();
-                    linearSearch(idToSearch);
-                    long endTime = System.nanoTime();
-                    long duration = (endTime - startTime);
-                    System.out.println("linear search duration = " + duration + " nanoseconds");
-                    startTime = System.nanoTime();
-                    indexSearch(idToSearch);
-                    endTime = System.nanoTime();
-                    duration = (endTime - startTime);
-                    System.out.println("index search duration = " + duration + " nanoseconds");
+                    makeSearchStats(nbCol);
                 }
                 else
                 {
@@ -180,7 +168,10 @@ public class GUI extends JFrame implements ActionListener {
 					}
 					 */
         }
+        constructBPTree();
     }
+
+    private void constructBPTree() { bInt.construct(); }
 
     private int linearSearch(int id)
     {
@@ -199,6 +190,23 @@ public class GUI extends JFrame implements ActionListener {
     private boolean indexSearch(int id)
     {
         return bInt.search(id);
+    }
+
+    private void makeSearchStats(int nbCol)
+    {
+        Random rand = new Random();
+        int idx = rand.nextInt(records.size());
+        int idToSearch = Integer.parseInt(records.get(idx).get(nbCol));
+        long startTime = System.nanoTime();
+        linearSearch(idToSearch);
+        long endTime = System.nanoTime();
+        long duration = (endTime - startTime);
+        System.out.println("linear search duration = " + duration + " nanoseconds");
+        startTime = System.nanoTime();
+        indexSearch(idToSearch);
+        endTime = System.nanoTime();
+        duration = (endTime - startTime);
+        System.out.println("index search duration = " + duration + " nanoseconds");
     }
 
 
