@@ -180,7 +180,7 @@ public class GUI extends JFrame implements ActionListener {
         {
             if (id == Integer.parseInt(records.get(i).get(nbCol)))
             {
-                System.out.println("found it. " + id + "'s ptr is = " + i);
+                //System.out.println("found it. " + id + "'s ptr is = " + i);
                 return i;
             }
         }
@@ -195,18 +195,41 @@ public class GUI extends JFrame implements ActionListener {
     private void makeSearchStats(int nbCol)
     {
         Random rand = new Random();
-        int idx = rand.nextInt(records.size());
-        int idToSearch = Integer.parseInt(records.get(idx).get(nbCol));
-        long startTime = System.nanoTime();
-        linearSearch(idToSearch);
-        long endTime = System.nanoTime();
-        long duration = (endTime - startTime);
-        System.out.println("linear search duration = " + duration + " nanoseconds");
-        startTime = System.nanoTime();
-        indexSearch(idToSearch);
-        endTime = System.nanoTime();
-        duration = (endTime - startTime);
-        System.out.println("index search duration = " + duration + " nanoseconds");
+        long totLinear = 0;
+        long totIndex = 0;
+        long minLinear = 1000000000;
+        long minIndex = 1000000000;
+        long maxLinear = 0;
+        long maxIndex = 0;
+        for (int i = 0; i < 100; i++) {
+            int idx = rand.nextInt(records.size() - 1) + 1;
+            int idToSearch = Integer.parseInt(records.get(idx).get(nbCol));
+
+            long startTime = System.nanoTime();
+            linearSearch(idToSearch);
+            long endTime = System.nanoTime();
+            long linearDuration = endTime - startTime;
+            totLinear += linearDuration;
+            if (linearDuration >= maxLinear) maxLinear = linearDuration;
+            if (linearDuration <= minLinear) minLinear = linearDuration;
+
+            startTime = System.nanoTime();
+            indexSearch(idToSearch);
+            endTime = System.nanoTime();
+            long indexDuration = endTime - startTime;
+            totIndex += indexDuration;
+            if (indexDuration >= maxIndex) maxIndex = indexDuration;
+            if (indexDuration <= minIndex) minIndex = indexDuration;
+        }
+        System.out.println("Linear Search stats :");
+        System.out.println("average = " + totLinear / 100 + " nanoseconds");
+        System.out.println("max = " + maxLinear + " nanoseconds");
+        System.out.println("min = " + minLinear + " nanoseconds");
+        System.out.println("---------------------------------------------");
+        System.out.println("Index Search stats :");
+        System.out.println("average = " + totIndex / 100 + " nanoseconds");
+        System.out.println("max = " + maxIndex + " nanoseconds");
+        System.out.println("min = " + minIndex + " nanoseconds");
     }
 
 

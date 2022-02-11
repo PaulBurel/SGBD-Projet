@@ -78,7 +78,7 @@ public class BTreePlus<Type> implements java.io.Serializable {
         {
             int found = ln.binarySearch((int)(id));
             if (found == -1) System.out.println("bug = " + ln.keys);
-            System.out.println("found it. " + ln.keys.get(found) + "'s ptr is = " + ln.ptrs.get(found));
+            //System.out.println("found it. " + ln.keys.get(found) + "'s ptr is = " + ln.ptrs.get(found));
             return true;
         }
         for (int idx = 0; idx < ln.keys.size(); idx++)
