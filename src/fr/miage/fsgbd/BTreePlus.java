@@ -39,17 +39,22 @@ public class BTreePlus<Type> implements java.io.Serializable {
 
     public void construct()
     {
-        construct(this.racine);
+        construct(this.racine); // construit les liens entre feuilles
         System.out.println("");
         System.out.println("Construction Test : ");
-        test(this.racine);
+        test(this.racine); // test des liens et des pointeurs
         System.out.println("---------------");
         System.out.println("");
     }
 
-    private void construct(Noeud<Type> n)
+    private void construct(Noeud<Type> n) //traverse toute l'arbre. l'idéal serait de faire ça pendant le génération de l'arbre
     {
-        if (n.fils.size() == 0) n.isLeafNode();
+        if (n.fils.size() == 0) n.isLeafNode(); // si le noeud est une feuille
+
+        // si le noeud n'est pas une feuille il faudrait enlever les pointeurs
+        // car dans un b+ arbres les pointeurs sont stockés seulement dans les feuilles
+        else n.isNotLeafNode();
+
         for (int i = 0; i < n.fils.size(); i++) construct(n.fils.get(i));
     }
 
@@ -74,35 +79,36 @@ public class BTreePlus<Type> implements java.io.Serializable {
 
     private boolean search(Noeud<Type> ln, Type id)
     {
-        if (ln.fils.size() == 0)
+        if (ln.fils.size() == 0) // verifie si on est dans une feuille
         {
-            int found = ln.binarySearch((int)(id));
+            // on est dans la feuille contenant la clé qu'on cherche
+            int found = ln.binarySearch((int)(id));// recherche dichotomique pour trouver la clé dans le noeud
             if (found == -1) System.out.println("bug = " + ln.keys);
             //System.out.println("found it. " + ln.keys.get(found) + "'s ptr is = " + ln.ptrs.get(found));
             return true;
         }
-        for (int idx = 0; idx < ln.keys.size(); idx++)
+        for (int idx = 0; idx < ln.keys.size(); idx++) // itére sur les clés du noeud
         {
-            if ((int)(ln.keys.get(idx)) > (int)(id))
+            if ((int)(ln.keys.get(idx)) > (int)(id)) // si clé cherchée est inferieur au clé courante
             {
-                return search(ln.fils.get(idx), id);
+                return search(ln.fils.get(idx), id); // fils gauche
             }
-            else if ((int)(ln.keys.get(idx)) < (int)(id))
+            else if ((int)(ln.keys.get(idx)) < (int)(id)) // si clé cherchée est superieur au clé courante
             {
-                if (ln.keys.size() > idx + 1){
-                    if ((int)(ln.keys.get(idx + 1)) > (int)(id))
+                if (ln.keys.size() > idx + 1){ // verifie qu'il y a une clé apres la clé courante
+                    if ((int)(ln.keys.get(idx + 1)) > (int)(id)) // si clé cherché est inferieur à la prochaine clé du noeud
                     {
-                        return search(ln.fils.get(idx + 1), id);
+                        return search(ln.fils.get(idx + 1), id); // fils droit
                     }
                 }
-                else
+                else // si dernier clé du noeud
                 {
-                    return search(ln.fils.get(idx + 1), id);
+                    return search(ln.fils.get(idx + 1), id); // fils droit
                 }
             }
-            else if ((int)(ln.keys.get(idx)) == (int)(id))
+            else if ((int)(ln.keys.get(idx)) == (int)(id)) // si clé courante est la clé qu'on cherche mais on est pas dans une feuille
             {
-                return search(ln.fils.get(idx + 1), id);
+                return search(ln.fils.get(idx + 1), id); // fils droit
             }
         }
         return false;

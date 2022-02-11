@@ -30,6 +30,8 @@ public class Noeud<Type> implements java.io.Serializable {
 
     Noeud<Type> next = null;
 
+    boolean isLeaf = false;
+
 
     /* Constructeur de la classe noeud, qui permet l'ajout et la recherche d'�l�ment dans les branches
      * @param u Nombre de cl�s maximum du noeud
@@ -405,6 +407,12 @@ public class Noeud<Type> implements java.io.Serializable {
     public void isLeafNode()
     {
         if (getNoeudSuivant() != null) this.next = getNoeudSuivant();
+        this.isLeaf = true;
+    }
+    public void isNotLeafNode()
+    {
+        this.ptrs = new ArrayList<>();
+        this.isLeaf = false;
     }
 
     public Noeud<Type> getNoeudSuivant()
